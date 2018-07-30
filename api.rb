@@ -9,7 +9,7 @@ end
 
 before do
   # Open a connection before any request
-  @db = PG.connect( host: 'localhost', port: '25432', dbname: 'city', user: 'gis', password: 'gis' )
+  @db = PG.connect( host: 'pglive', port: '6432', dbname: 'city', user: 'gis', password: 'gis' )
   content_type 'application/json'
 end
 
