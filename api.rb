@@ -115,3 +115,55 @@ get '/addresses/:id' do
     FROM addresses a ON a.id = gfa.key
   SQL
 end
+
+=begin
+  @api {get} /cities/spatial_search /cities/spatial_search
+  @apiDescription City + Lat/Lng spatial query
+  @apiName GetCitiesSearch
+  @apiGroup Cities 
+  @apiVersion 1.0.0
+
+  @apiParam {Number} lat 
+    This is the latitude for a spatial query against the city boundaries of Orange County, CA. 
+
+    The number must be in decimal degree format. If the point does not intersect the county boundaries, this returns an empty array.
+    
+    Eg: 33.768091 
+
+  @apiParam {Number} lng 
+    This is the longitude for a spatial query against the city boundaries of Orange County, CA. 
+
+    The number must be in decimal degree format. If the point does not intersect the county boundaries, this returns an empty array.
+    
+    Eg: -117.913565
+
+  @apiSuccess {Object[]} cities Result of search in an array of JSON objects
+  @apiSuccess {String}   cities.in_city Name of city point intersects with
+  @apiSuccess {String}   cities.nearest_city Name of city closest to point
+  @apiSuccess {Number}   cities.distance_to_boundary Distance to the nearest city from point
+
+  @apiSampleRequest /cities/spatial_search
+=end
+
+get '/cities/spatial_search' do
+  lat = params[:lat]
+  lng = params[:lng]
+
+  sql = <<-SQL
+    with point as (select gis.create_point_geom($2::numeric(11,8), $1::numeric(11,8)) as geom),
+    within as (select c.name from gis_county.city_boundaries c join point p on st_intersects(c.geom, p.geom)),
+    nearest as (select cb.name, st_distance(p.geom, cb.geom) as distance 
+        from gis_county.city_boundaries cb, point p
+        where st_distance(p.geom, cb.geom) > 0)
+    select initcap(w.name) as in_city,
+      initcap(n.name) as nearest_city,
+      n.distance::numeric(10, 2) as distance_to_boundary
+    from within w, nearest n
+    order by n.distance
+    limit 1;
+  SQL
+
+  res = []
+  @db.exec_params(sql, [lat, lng]).each{ |r| res << r }
+  { cities: res }.to_json
+end

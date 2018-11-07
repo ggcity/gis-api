@@ -151,11 +151,81 @@
     },
     "sampleRequest": [
       {
-        "url": "https://www.ci.garden-grove.ca.us/maps/api/addresses/search"
+        "url": "https://ggcity.org/maps/api/addresses/search"
       }
     ],
     "filename": "./api.rb",
     "groupTitle": "Addresses"
+  },
+  {
+    "type": "get",
+    "url": "/cities/spatial_search",
+    "title": "/cities/spatial_search",
+    "description": "<p>City + Lat/Lng spatial query</p>",
+    "name": "GetCitiesSearch",
+    "group": "Cities",
+    "version": "1.0.0",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "lat",
+            "description": "<p>This is the latitude for a spatial query against the city boundaries of Orange County, CA.</p> <p>The number must be in decimal degree format. If the point does not intersect the county boundaries, this returns an empty array.</p> <p>Eg: 33.768091</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "lng",
+            "description": "<p>This is the longitude for a spatial query against the city boundaries of Orange County, CA.</p> <p>The number must be in decimal degree format. If the point does not intersect the county boundaries, this returns an empty array.</p> <p>Eg: -117.913565</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "cities",
+            "description": "<p>Result of search in an array of JSON objects</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "cities.in_city",
+            "description": "<p>Name of city point intersects with</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "cities.nearest_city",
+            "description": "<p>Name of city closest to point</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "cities.distance_to_boundary",
+            "description": "<p>Distance to the nearest city from point</p>"
+          }
+        ]
+      }
+    },
+    "sampleRequest": [
+      {
+        "url": "https://ggcity.org/maps/api/cities/spatial_search"
+      }
+    ],
+    "filename": "./api.rb",
+    "groupTitle": "Cities"
   },
   {
     "success": {
@@ -181,8 +251,8 @@
     "url": "",
     "version": "0.0.0",
     "filename": "./doc/main.js",
-    "group": "_var_www_html_api_doc_main_js",
-    "groupTitle": "_var_www_html_api_doc_main_js",
+    "group": "_srv_containers_api_doc_main_js",
+    "groupTitle": "_srv_containers_api_doc_main_js",
     "name": ""
   }
 ]
