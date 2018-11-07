@@ -9,7 +9,7 @@ end
 
 before do
   # Open a connection before any request
-  @db = PG.connect( host: 'pgquery', dbname: 'city', user: 'gis', password: 'gis' )
+  @db = PG.connect( host: 'pglive', port: '6432', dbname: 'city', user: 'gis', password: 'gis' )
   content_type 'application/json'
 end
 
@@ -64,18 +64,18 @@ get '/addresses/search' do
     SELECT
       a.id,
       gfa.name AS address,
-      zip_code,
-      zip_4,
-      city,
-      unit,
-      floor,
-      unit_designator,
-      building_name,
-      is_mailable,
-      ST_X(ST_Transform(geom, 4326)) AS longitude,
-      ST_Y(ST_Transform(geom, 4326)) AS latitude
+      a.zip_code,
+      a.zip_4,
+      a.city,
+      a.unit,
+      a.floor,
+      a.unit_designator,
+      a.building_name,
+      a.is_mailable,
+      ST_X(ST_Transform(a.geom, 4326)) AS longitude,
+      ST_Y(ST_Transform(a.geom, 4326)) AS latitude
     FROM gg_find_address($1) gfa
-    JOIN addresses a ON a.id = gfa.key
+    JOIN public.addresses a ON a.id = gfa.key
     LIMIT $2
   SQL
 
@@ -85,6 +85,108 @@ get '/addresses/search' do
   @db.exec_params(sql, [ q, limit ]).each{ |r| res << r }
   { addresses: res }.to_json
 end
+
+=begin
+  @api {get} /addresses/info /addresses/info
+  @apiDescription General address info
+  @apiName GetAddressesInfo
+  @apiGroup Addresses
+  @apiVersion 1.0.0
+
+  @apiParam {String} q 
+    This is the address search query. If this does not contain any partial street 
+    name, this returns empty array.
+
+    Requires a minimum string length of 4 characters.
+    
+    Eg: \
+    12345 Euclid \
+    12000 Euclid OR 12 Euclid (block search, all 12xxx addresses on Euclid) \
+    10052 Em (partial street name search)
+
+  @apiSuccess {Object[]} addresses Result of search in an array of JSON objects
+  @apiSuccess {Number}   addresses.id Internal address id. This is unique across all Garden Grove applications.
+  @apiSuccess {String}   addresses.address Human readable address string that matches the search
+  @apiSuccess {String}   addresses.city City code abbreviation
+  @apiSuccess {String}   addresses.zip_code Zip code
+  @apiSuccess {String}   addresses.pd_district TEST
+  @apiSuccess {Number}   addresses.fd_district TEST
+  @apiSuccess {Number}   addresses.council_district TEST
+  @apiSuccess {String}   addresses.parcel_atlas_sheet TEST
+  @apiSuccess {String}   addresses.code_enforcement_officer TEST
+  @apiSuccess {String}   addresses.census_tract TEST
+  @apiSuccess {String}   addresses.college_district TEST
+  @apiSuccess {String}   addresses.elementary_school_district TEST
+  @apiSuccess {Boolean}  addresses.in_sfha TEST
+  @apiSuccess {String}   addresses.sfha_zone TEST
+  @apiSuccess {String}   addresses.high_school_district TEST
+  @apiSuccess {String}   addresses.parcel_apn TEST
+  @apiSuccess {String}   addresses.unified_school_district TEST
+  @apiSuccess {String}   addresses.nearest_fire_station TEST
+  @apiSuccess {String}   addresses.cdbg_zone TEST
+  @apiSuccess {String}   addresses.land_use_designation TEST
+  @apiSuccess {String}   addresses.redevelopment_zone TEST
+  @apiSuccess {String}   addresses.zoning_zone TEST
+  @apiSuccess {String}   addresses.zoning_designation TEST
+  @apiSuccess {String}   addresses.street_sweeping_days TEST
+  @apiSuccess {String}   addresses.trash_pickup_day TEST
+  @apiSuccess {String}   addresses.state_assembly_district TEST
+  @apiSuccess {String}   addresses.state_congressional_district TEST
+  @apiSuccess {String}   addresses.state_senate_district TEST
+  @apiSuccess {String}   addresses.nearest_park TEST
+  @apiSuccess {Number}   addresses.longitude SRID 4326
+  @apiSuccess {Number}   addresses.latitude SRID 4326
+
+  @apiSampleRequest /addresses/info
+=end
+get '/addresses/info' do
+  q = params[:q]
+
+  sql = <<-SQL
+    SELECT
+      a.address_id,
+      gfa.name AS address,
+      a.city,
+      a.zip_code,
+      a.pd_district,
+      a.fd_district,
+      a.council_district,
+      a.parcel_atlas_sheet,
+      a.code_enforcement_officer,
+      a.census_tract,
+      a.college_district,
+      a.elementary_school_district,
+      a.in_sfha,
+      a.sfha_zone,
+      a.high_school_district,
+      a.parcel_apn,
+      a.unified_school_district,
+      a.nearest_fire_station,
+      a.cdbg_zone,
+      a.land_use_designation,
+      a.redevelopment_zone,
+      a.zoning_zone,
+      a.zoning_designation,
+      a.street_sweeping_days,
+      a.trash_pickup_day,
+      a.state_assembly_district,
+      a.state_congressional_district,
+      a.state_senate_district,
+      np.nearest_park,
+      ST_X(ST_Transform(a.geom, 4326)) AS longitude,
+      ST_Y(ST_Transform(a.geom, 4326)) AS latitude
+    FROM gg_find_address($1) gfa
+    JOIN gis_city.addresses_spatial_joins a on a.address_id = gfa.key
+    JOIN gis_city.addresses_nearest_park np on np.address_id = gfa.key
+    LIMIT 1
+
+  SQL
+
+  res = []
+  @db.exec_params(sql, [ q ]).each{ |r| res << r }
+  { address: res }.to_json
+end
+
 
 =begin
   @api {get} /addresses/:id /addresses/:id
@@ -102,17 +204,17 @@ get '/addresses/:id' do
     SELECT
       a.id,
       gfa.name AS address,
-      zip_code,
-      zip_4,
-      city,
-      unit,
-      floor,
-      unit_designator,
-      building_name,
-      is_mailable,
-      ST_X(ST_Transform(geom, 4326)) AS longitude,
-      ST_Y(ST_Transform(geom, 4326)) AS latitude
-    FROM addresses a ON a.id = gfa.key
+      a.zip_code,
+      a.zip_4,
+      a.city,
+      a.unit,
+      a.floor,
+      a.unit_designator,
+      a.building_name,
+      a.is_mailable,
+      ST_X(ST_Transform(a.geom, 4326)) AS longitude,
+      ST_Y(ST_Transform(a.geom, 4326)) AS latitude
+    FROM public.addresses a ON a.id = gfa.key
   SQL
 end
 

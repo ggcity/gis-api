@@ -10,6 +10,7 @@ WORKDIR /usr/src/app
 RUN cd /usr/src/app && bundle install --without development test
 
 VOLUME /usr/src/app
+VOLUME ./api.rb
 ENV PORT="4567" HOST="0.0.0.0" ENV="production"
 
 CMD ruby api.rb -p $PORT -o $HOST -e $ENV
