@@ -5,12 +5,16 @@ RUN apk update \
 
 RUN mkdir -p /usr/src/app/
 COPY ./Gemfile /usr/src/app/
+COPY ./secrets.yml /usr/src/app/
 WORKDIR /usr/src/app
 
-RUN cd /usr/src/app && bundle install --without development test
+RUN cd /usr/src/app \
+  && bundle install --without development test
 
 VOLUME /usr/src/app
 VOLUME ./api.rb
-ENV PORT="4567" HOST="0.0.0.0" ENV="production"
+ENV PORT="4567" HOST="0.0.0.0" ENV="development"
 
-CMD ruby api.rb -p $PORT -o $HOST -e $ENV
+CMD cd /usr/src/app \
+  && bundle update \
+  && ruby api.rb -p $PORT -o $HOST -e $ENV

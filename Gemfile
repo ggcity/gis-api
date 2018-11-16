@@ -1,6 +1,6 @@
 source 'https://rubygems.org' do
-  gem 'pg'
-  gem 'sinatra'
+  gem 'pg', '>=1.1.3'
+  gem 'sinatra', '>=2.0.4'
 
   group :development do
     gem 'pry'

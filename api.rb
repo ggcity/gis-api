@@ -3,13 +3,23 @@
 require 'sinatra'
 require 'pg'
 require 'json'
+require 'yaml'
 
 configure do
 end
 
 before do
+  # Read connection credentials
+  creds = YAML.load_file('secrets.yml')
+
+  pg_host = creds['PG_HOST']
+  pg_port = creds['PG_PORT']
+  pg_db = creds['PG_DB']
+  pg_user = creds['PG_USER']
+  pg_pass = creds['PG_PASS']
+
   # Open a connection before any request
-  @db = PG.connect( host: 'pglive', port: '6432', dbname: 'city', user: 'gis', password: 'gis' )
+  @db = PG.connect( host: pg_host, port: pg_port, dbname: pg_db, user: pg_user, password: pg_pass )
   content_type 'application/json'
 end
 
@@ -248,7 +258,7 @@ end
 =end
 
 get '/cities/spatial_search' do
-  lat = params[:lat]
+  q = params[:q]
   lng = params[:lng]
 
   sql = <<-SQL
@@ -268,4 +278,64 @@ get '/cities/spatial_search' do
   res = []
   @db.exec_params(sql, [lat, lng]).each{ |r| res << r }
   { cities: res }.to_json
+end
+
+=begin
+  @api {get} /locations/suggest /locations/suggest
+  @apiDescription 
+    Suggests known, valid Garden Grove addresses or intersections.
+    Usually used in a typedown, autocomplete text box to help entering
+    addresses.
+  @apiName GetLocationsSuggest
+  @apiGroup Locations
+  @apiVersion 1.0.0
+
+  @apiParam {String} q 
+    This is the location search query. Addresses and intersections can be searched.
+
+    Requires a minimum string length of 4 characters.
+    
+    Eg: \
+    12345 Euclid \
+    12000 Euclid OR 12 Euclid (block search, all 12xxx addresses on Euclid) \
+    10052 Em (partial street name search)\
+    Euclid / Garden Grove \
+    Garden Grove / Euclid
+
+  @apiParam {Number} [limit=20]
+    Maximum return results. Upper hard limit is 20 no matter what
+    this value is set to.
+
+  @apiSuccess {Object[]} locations Result of search in an array of JSON objects
+  @apiSuccess {Number}   locations.id Unique internal ID for this location
+  @apiSuccess {String}   locations.name Pretty print name of this location
+  @apiSuccess {Number}   addresses.longitude SRID 4326
+  @apiSuccess {Number}   addresses.latitude SRID 4326
+
+  @apiSampleRequest /locations/suggest
+=end
+
+get '/locations/suggest' do
+  q = params[:q]
+  limit = params[:limit]
+
+  sql = <<-SQL
+    SELECT
+      gfl.key AS id,
+      gfl.name AS name,
+      ST_X(ST_Transform(COALESCE(a.geom, i.geom), 4326)) AS longitude,
+      ST_Y(ST_Transform(COALESCE(a.geom, i.geom), 4326)) AS latitude
+    FROM gg_find_location($1) gfl
+    LEFT JOIN public.addresses a ON a.id = gfl.key
+    LEFT JOIN public.intersections i ON i.id = gfl.key
+    WHERE COALESCE(a.geom, i.geom) IS NOT NULL
+    ORDER BY id
+    LIMIT $2
+  SQL
+
+  limit = (limit && limit.to_i < 20) ? limit : 20
+
+  res = []
+  @db.exec_params(sql, [ q, limit ]).each{ |r| res << r }
+  res.to_json
 end
