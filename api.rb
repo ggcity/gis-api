@@ -119,31 +119,31 @@ end
   @apiSuccess {String}   addresses.address Human readable address string that matches the search
   @apiSuccess {String}   addresses.city City code abbreviation
   @apiSuccess {String}   addresses.zip_code Zip code
-  @apiSuccess {String}   addresses.pd_district TEST
-  @apiSuccess {Number}   addresses.fd_district TEST
-  @apiSuccess {Number}   addresses.council_district TEST
-  @apiSuccess {String}   addresses.parcel_atlas_sheet TEST
-  @apiSuccess {String}   addresses.code_enforcement_officer TEST
-  @apiSuccess {String}   addresses.census_tract TEST
-  @apiSuccess {String}   addresses.college_district TEST
-  @apiSuccess {String}   addresses.elementary_school_district TEST
-  @apiSuccess {Boolean}  addresses.in_sfha TEST
-  @apiSuccess {String}   addresses.sfha_zone TEST
-  @apiSuccess {String}   addresses.high_school_district TEST
-  @apiSuccess {String}   addresses.parcel_apn TEST
-  @apiSuccess {String}   addresses.unified_school_district TEST
-  @apiSuccess {String}   addresses.nearest_fire_station TEST
-  @apiSuccess {String}   addresses.cdbg_zone TEST
-  @apiSuccess {String}   addresses.land_use_designation TEST
-  @apiSuccess {String}   addresses.redevelopment_zone TEST
-  @apiSuccess {String}   addresses.zoning_zone TEST
-  @apiSuccess {String}   addresses.zoning_designation TEST
-  @apiSuccess {String}   addresses.street_sweeping_days TEST
-  @apiSuccess {String}   addresses.trash_pickup_day TEST
-  @apiSuccess {String}   addresses.state_assembly_district TEST
-  @apiSuccess {String}   addresses.state_congressional_district TEST
-  @apiSuccess {String}   addresses.state_senate_district TEST
-  @apiSuccess {String}   addresses.nearest_park TEST
+  @apiSuccess {String}   addresses.pd_district Police district address spatially intersects
+  @apiSuccess {Number}   addresses.fd_district Fire district address spatially intersects
+  @apiSuccess {Number}   addresses.council_district Council district address spatially intersects
+  @apiSuccess {String}   addresses.parcel_atlas_sheet Legacy parcel sheet address spatially intersects
+  @apiSuccess {String}   addresses.code_enforcement_officer Code enforcement officer assigned to address 
+  @apiSuccess {String}   addresses.census_tract Census tract address spatially intersects
+  @apiSuccess {String}   addresses.college_district Community college district address spatially intersects
+  @apiSuccess {String}   addresses.elementary_school_district Elementary school district address spatially intersects
+  @apiSuccess {Boolean}  addresses.in_sfha Boolean noting if address is within a FEMA special flood hazard area
+  @apiSuccess {String}   addresses.sfha_zone FEMA special flood hazard area address spatially intersects
+  @apiSuccess {String}   addresses.high_school_district High school district address spatially intersects
+  @apiSuccess {String}   addresses.parcel_apn Parcel APN id address spatially intersects
+  @apiSuccess {String}   addresses.unified_school_district Unified school district address spatially intersects
+  @apiSuccess {String}   addresses.nearest_fire_station Closest Garden Grove fire station to address
+  @apiSuccess {String}   addresses.cdbg_zone Community Development Block Grant address spatially intersects
+  @apiSuccess {String}   addresses.land_use_designation General Plan land use designation address spatially intersects
+  @apiSuccess {String}   addresses.redevelopment_zone Redevelopment zone address spatially intersects
+  @apiSuccess {String}   addresses.zoning_zone Planning zone address spatially intersects
+  @apiSuccess {String}   addresses.zoning_designation Planning zone designation address spatially intersects
+  @apiSuccess {String}   addresses.street_sweeping_days Days of month street sweeping occurs at address
+  @apiSuccess {String}   addresses.trash_pickup_day Day of week trash pickup occurs at address
+  @apiSuccess {String}   addresses.state_assembly_district CA State Assembly district address spatially intersects
+  @apiSuccess {String}   addresses.state_congressional_district CA State Congressional district address spatially intersects
+  @apiSuccess {String}   addresses.state_senate_district CA State Senate district address spatially intersects
+  @apiSuccess {String}   addresses.nearest_park Nearest city park to address
   @apiSuccess {Number}   addresses.longitude SRID 4326
   @apiSuccess {Number}   addresses.latitude SRID 4326
 
