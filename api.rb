@@ -122,6 +122,7 @@ end
   @apiSuccess {String}   addresses.pd_district Police district address spatially intersects
   @apiSuccess {Number}   addresses.fd_district Fire district address spatially intersects
   @apiSuccess {Number}   addresses.council_district Council district address spatially intersects
+  @apiSuccess {String}   addresses.council_member Council Member representing the given address
   @apiSuccess {String}   addresses.parcel_atlas_sheet Legacy parcel sheet address spatially intersects
   @apiSuccess {String}   addresses.code_enforcement_officer Code enforcement officer assigned to address 
   @apiSuccess {String}   addresses.census_tract Census tract address spatially intersects
@@ -161,6 +162,7 @@ get '/addresses/info' do
       a.pd_district,
       a.fd_district,
       a.council_district,
+      a.council_member,
       a.parcel_atlas_sheet,
       a.code_enforcement_officer,
       a.census_tract,
@@ -194,39 +196,13 @@ get '/addresses/info' do
 
   res = []
   @db.exec_params(sql, [ q ]).each{ |r| res << r }
-  { address: res }.to_json
+  if (res.size == 0) then
+    return {}
+  else
+    return res[0].to_json
+  end
 end
 
-
-=begin
-  @api {get} /addresses/:id /addresses/:id
-  @apiDescription Get address details from an address id
-  @apiName GetAddressID
-  @apiGroup Addresses
-  @apiVersion 1.0.0
-
-  @apiParam {Number} id Address ID
-
-  @apiSampleRequest off
-=end
-get '/addresses/:id' do
-  sql = <<-SQL
-    SELECT
-      a.id,
-      gfa.name AS address,
-      a.zip_code,
-      a.zip_4,
-      a.city,
-      a.unit,
-      a.floor,
-      a.unit_designator,
-      a.building_name,
-      a.is_mailable,
-      ST_X(ST_Transform(a.geom, 4326)) AS longitude,
-      ST_Y(ST_Transform(a.geom, 4326)) AS latitude
-    FROM public.addresses a ON a.id = gfa.key
-  SQL
-end
 
 =begin
   @api {get} /cities/spatial_search /cities/spatial_search
