@@ -49,7 +49,21 @@
             "type": "String",
             "optional": false,
             "field": "addresses.city",
-            "description": "<p>City code abbreviation</p>"
+            "description": "<p>This is alias field for postal_city</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "addresses.postal_city",
+            "description": "<p>City name as it appears in USPS database</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "addresses.jurisdiction",
+            "description": "<p>The actually entity that is responsible for this address</p>"
           },
           {
             "group": "Success 200",

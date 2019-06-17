@@ -82,8 +82,8 @@ get '/addresses/search' do
       a.unit_designator,
       a.building_name,
       a.is_mailable,
-      ST_X(ST_Transform(a.geom, 4326)) AS longitude,
-      ST_Y(ST_Transform(a.geom, 4326)) AS latitude
+      ST_X(ST_Transform(a.geom, 4326))::numeric(9,6) AS longitude,
+      ST_Y(ST_Transform(a.geom, 4326))::numeric(9,6) AS latitude
     FROM gg_find_address($1) gfa
     JOIN public.addresses a ON a.id = gfa.key
     LIMIT $2
@@ -117,7 +117,9 @@ end
   @apiSuccess {Object[]} addresses Result of search in an array of JSON objects
   @apiSuccess {Number}   addresses.id Internal address id. This is unique across all Garden Grove applications.
   @apiSuccess {String}   addresses.address Human readable address string that matches the search
-  @apiSuccess {String}   addresses.city City code abbreviation
+  @apiSuccess {String}   addresses.city This is an alias field for postal_city
+  @apiSuccess {String}   addresses.postal_city City name as it appears in USPS database
+  @apiSuccess {String}   addresses.jurisdiction The actually entity that is responsible for this address
   @apiSuccess {String}   addresses.zip_code Zip code
   @apiSuccess {String}   addresses.pd_district Police district address spatially intersects
   @apiSuccess {Number}   addresses.fd_district Fire district address spatially intersects
@@ -156,8 +158,10 @@ get '/addresses/info' do
   sql = <<-SQL
     SELECT
       a.address_id,
-      gfa.name AS address,
-      a.city,
+      a.address,
+      a.postal_city as city,
+      a.postal_city,
+      a.jurisdiction,
       a.zip_code,
       a.pd_district,
       a.fd_district,
@@ -185,21 +189,21 @@ get '/addresses/info' do
       a.state_congressional_district,
       a.state_senate_district,
       np.nearest_park,
-      ST_X(ST_Transform(a.geom, 4326)) AS longitude,
-      ST_Y(ST_Transform(a.geom, 4326)) AS latitude
+      ST_X(ST_Transform(a.geom, 4326))::numeric(9,6) AS longitude,
+      ST_Y(ST_Transform(a.geom, 4326))::numeric(9,6) AS latitude
     FROM gg_find_address($1) gfa
-    JOIN gis_city.addresses_spatial_joins a on a.address_id = gfa.key
-    JOIN gis_city.addresses_nearest_park np on np.address_id = gfa.key
+    JOIN gis.city_addresses ca ON ca.id = gfa.key
+    LEFT JOIN gis_city.addresses_spatial_joins a ON a.address_id = gfa.key
+    LEFT JOIN gis_city.addresses_nearest_park np ON np.address_id = gfa.key
     LIMIT 1
 
   SQL
 
-  res = []
-  @db.exec_params(sql, [ q ]).each{ |r| res << r }
-  if (res.size == 0) then
-    return {}
-  else
-    return res[0].to_json
+  results = @db.exec_params(sql, [ q ])
+  if results.num_tuples == 0 then
+    return {}.to_json
+  else 
+    return results[0].to_json
   end
 end
 
