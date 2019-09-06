@@ -98,65 +98,73 @@ end
 
 =begin
   @api {get} /addresses/info /addresses/info
-  @apiDescription General address info
+  @apiDescription Returns most information we have about an address. 
   @apiName GetAddressesInfo
   @apiGroup Addresses
   @apiVersion 1.0.0
 
-  @apiParam {String} q 
-    This is the address search query. If this does not contain any partial street 
-    name, this returns empty array.
+  @apiParam {Number} id
+    Address ID. eg: 65606
 
-    Requires a minimum string length of 4 characters.
+  @apiParam {String} q 
+    Full address. You may omit street suffix if there's no ambiguity (ACACIA PKWY or ACACIA AVE).
+
+    Requires a minimum string length of 4 characters. Returns one and only one result even if 
+    there are multiple matches.
+
+    If id parameter is specified, this parameter is ignored.
     
     Eg: \
     12345 Euclid \
-    12000 Euclid OR 12 Euclid (block search, all 12xxx addresses on Euclid) \
-    10052 Em (partial street name search)
+    11222 Acacia Pkwy
 
-  @apiSuccess {Object[]} addresses Result of search in an array of JSON objects
-  @apiSuccess {Number}   addresses.id Internal address id. This is unique across all Garden Grove applications.
-  @apiSuccess {String}   addresses.address Human readable address string that matches the search
-  @apiSuccess {String}   addresses.city This is an alias field for postal_city
-  @apiSuccess {String}   addresses.postal_city City name as it appears in USPS database
-  @apiSuccess {String}   addresses.jurisdiction The actually entity that is responsible for this address
-  @apiSuccess {String}   addresses.zip_code Zip code
-  @apiSuccess {String}   addresses.pd_district Police district address spatially intersects
-  @apiSuccess {Number}   addresses.fd_district Fire district address spatially intersects
-  @apiSuccess {Number}   addresses.council_district Council district address spatially intersects
-  @apiSuccess {String}   addresses.council_member Council Member representing the given address
-  @apiSuccess {String}   addresses.parcel_atlas_sheet Legacy parcel sheet address spatially intersects
-  @apiSuccess {String}   addresses.code_enforcement_officer Code enforcement officer assigned to address 
-  @apiSuccess {String}   addresses.census_tract Census tract address spatially intersects
-  @apiSuccess {String}   addresses.college_district Community college district address spatially intersects
-  @apiSuccess {String}   addresses.elementary_school_district Elementary school district address spatially intersects
-  @apiSuccess {Boolean}  addresses.in_sfha Boolean noting if address is within a FEMA special flood hazard area
-  @apiSuccess {String}   addresses.sfha_zone FEMA special flood hazard area address spatially intersects
-  @apiSuccess {String}   addresses.high_school_district High school district address spatially intersects
-  @apiSuccess {String}   addresses.parcel_apn Parcel APN id address spatially intersects
-  @apiSuccess {String}   addresses.unified_school_district Unified school district address spatially intersects
-  @apiSuccess {String}   addresses.nearest_fire_station Closest Garden Grove fire station to address
-  @apiSuccess {String}   addresses.cdbg_zone Community Development Block Grant address spatially intersects
-  @apiSuccess {String}   addresses.land_use_designation General Plan land use designation address spatially intersects
-  @apiSuccess {String}   addresses.redevelopment_zone Redevelopment zone address spatially intersects
-  @apiSuccess {String}   addresses.zoning_zone Planning zone address spatially intersects
-  @apiSuccess {String}   addresses.zoning_designation Planning zone designation address spatially intersects
-  @apiSuccess {String}   addresses.street_sweeping_days Days of month street sweeping occurs at address
-  @apiSuccess {String}   addresses.trash_pickup_day Day of week trash pickup occurs at address
-  @apiSuccess {String}   addresses.state_assembly_district CA State Assembly district address spatially intersects
-  @apiSuccess {String}   addresses.state_congressional_district CA State Congressional district address spatially intersects
-  @apiSuccess {String}   addresses.state_senate_district CA State Senate district address spatially intersects
-  @apiSuccess {String}   addresses.nearest_park Nearest city park to address
-  @apiSuccess {Number}   addresses.longitude SRID 4326
-  @apiSuccess {Number}   addresses.latitude SRID 4326
+  @apiSuccess {Number}   id Internal address id. This is unique across all Garden Grove applications.
+  @apiSuccess {String}   address Human readable address string that matches the search
+  @apiSuccess {String}   city This is an alias field for postal_city
+  @apiSuccess {String}   postal_city City name as it appears in USPS database
+  @apiSuccess {String}   jurisdiction The actually entity that is responsible for this address
+  @apiSuccess {String}   zip_code Zip code
+  @apiSuccess {String}   pd_district Police district address spatially intersects
+  @apiSuccess {Number}   fd_district Fire district address spatially intersects
+  @apiSuccess {Number}   council_district Council district address spatially intersects
+  @apiSuccess {String}   council_member Council Member representing the given address
+  @apiSuccess {String}   parcel_atlas_sheet Legacy parcel sheet address spatially intersects
+  @apiSuccess {String}   code_enforcement_officer Code enforcement officer assigned to address 
+  @apiSuccess {String}   census_tract Census tract address spatially intersects
+  @apiSuccess {String}   college_district Community college district address spatially intersects
+  @apiSuccess {String}   elementary_school_district Elementary school district address spatially intersects
+  @apiSuccess {Boolean}  in_sfha Boolean noting if address is within a FEMA special flood hazard area
+  @apiSuccess {String}   sfha_zone FEMA special flood hazard area address spatially intersects
+  @apiSuccess {String}   high_school_district High school district address spatially intersects
+  @apiSuccess {String}   parcel_apn Parcel APN id address spatially intersects
+  @apiSuccess {String}   unified_school_district Unified school district address spatially intersects
+  @apiSuccess {String}   nearest_fire_station Closest Garden Grove fire station to address
+  @apiSuccess {String}   cdbg_zone Community Development Block Grant address spatially intersects
+  @apiSuccess {String}   land_use_designation General Plan land use designation address spatially intersects
+  @apiSuccess {String}   redevelopment_zone Redevelopment zone address spatially intersects
+  @apiSuccess {String}   zoning_zone Planning zone address spatially intersects
+  @apiSuccess {String}   zoning_designation Planning zone designation address spatially intersects
+  @apiSuccess {String}   street_sweeping_days Days of month street sweeping occurs at address
+  @apiSuccess {String}   trash_pickup_day Day of week trash pickup occurs at address
+  @apiSuccess {String}   state_assembly_district CA State Assembly district address spatially intersects
+  @apiSuccess {String}   state_congressional_district CA State Congressional district address spatially intersects
+  @apiSuccess {String}   state_senate_district CA State Senate district address spatially intersects
+  @apiSuccess {String}   nearest_park Nearest city park to address
+  @apiSuccess {Number}   longitude SRID 4326
+  @apiSuccess {Number}   latitude SRID 4326
 
   @apiSampleRequest /addresses/info
 =end
 get '/addresses/info' do
-  q = params[:q]
+  id = params[:id]
+  id = (id && id.strip == '') ? nil : id
 
-  sql = <<-SQL
-    SELECT
+  q = params[:q]
+  q = (q && q.strip == '') ? nil : q
+
+  s = id || q
+
+  select = <<-SQL
       a.address_id,
       a.address,
       a.postal_city as city,
@@ -191,15 +199,32 @@ get '/addresses/info' do
       np.nearest_park,
       ST_X(ST_Transform(a.geom, 4326))::numeric(9,6) AS longitude,
       ST_Y(ST_Transform(a.geom, 4326))::numeric(9,6) AS latitude
-    FROM gg_find_address($1) gfa
-    JOIN gis.city_addresses ca ON ca.id = gfa.key
-    LEFT JOIN gis_city.addresses_spatial_joins a ON a.address_id = gfa.key
-    LEFT JOIN gis_city.addresses_nearest_park np ON np.address_id = gfa.key
-    LIMIT 1
-
   SQL
 
-  results = @db.exec_params(sql, [ q ])
+  if id then
+    sql = <<-SQL
+      SELECT
+      #{select}
+      FROM gis.city_addresses ca
+      LEFT JOIN gis_city.addresses_spatial_joins a ON a.address_id = ca.id
+      LEFT JOIN gis_city.addresses_nearest_park np ON np.address_id = ca.id
+      WHERE ca.id = $1
+    SQL
+  elsif q then
+    sql = <<-SQL
+      SELECT
+      #{select}
+      FROM gg_find_address($1) gfa
+      JOIN gis.city_addresses ca ON ca.id = gfa.key
+      LEFT JOIN gis_city.addresses_spatial_joins a ON a.address_id = gfa.key
+      LEFT JOIN gis_city.addresses_nearest_park np ON np.address_id = gfa.key
+      LIMIT 1
+    SQL
+  else
+    return {}.to_json
+  end
+
+  results = @db.exec_params(sql, [ s ])
   if results.num_tuples == 0 then
     return {}.to_json
   else 
