@@ -3,7 +3,7 @@ define({ "api": [
     "type": "get",
     "url": "/addresses/info",
     "title": "/addresses/info",
-    "description": "<p>General address info</p>",
+    "description": "<p>Returns most information we have about an address.</p>",
     "name": "GetAddressesInfo",
     "group": "Addresses",
     "version": "1.0.0",
@@ -12,10 +12,17 @@ define({ "api": [
         "Parameter": [
           {
             "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Address ID. eg: 65606</p>"
+          },
+          {
+            "group": "Parameter",
             "type": "String",
             "optional": false,
             "field": "q",
-            "description": "<p>This is the address search query. If this does not contain any partial street name, this returns empty array.</p> <p>Requires a minimum string length of 4 characters.</p> <p>Eg: <br> 12345 Euclid <br> 12000 Euclid OR 12 Euclid (block search, all 12xxx addresses on Euclid) <br> 10052 Em (partial street name search)</p>"
+            "description": "<p>Full address. You may omit street suffix if there's no ambiguity (ACACIA PKWY or ACACIA AVE).</p> <p>Requires a minimum string length of 4 characters. Returns one and only one result even if there are multiple matches.</p> <p>If id parameter is specified, this parameter is ignored.</p> <p>Eg: <br> 12345 Euclid <br> 11222 Acacia Pkwy</p>"
           }
         ]
       }
@@ -25,247 +32,240 @@ define({ "api": [
         "Success 200": [
           {
             "group": "Success 200",
-            "type": "Object[]",
-            "optional": false,
-            "field": "addresses",
-            "description": "<p>Result of search in an array of JSON objects</p>"
-          },
-          {
-            "group": "Success 200",
             "type": "Number",
             "optional": false,
-            "field": "addresses.id",
+            "field": "id",
             "description": "<p>Internal address id. This is unique across all Garden Grove applications.</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.address",
+            "field": "address",
             "description": "<p>Human readable address string that matches the search</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.city",
-            "description": "<p>This is alias field for postal_city</p>"
+            "field": "city",
+            "description": "<p>This is an alias field for postal_city</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.postal_city",
+            "field": "postal_city",
             "description": "<p>City name as it appears in USPS database</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.jurisdiction",
+            "field": "jurisdiction",
             "description": "<p>The actually entity that is responsible for this address</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.zip_code",
+            "field": "zip_code",
             "description": "<p>Zip code</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.pd_district",
+            "field": "pd_district",
             "description": "<p>Police district address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "Number",
             "optional": false,
-            "field": "addresses.fd_district",
+            "field": "fd_district",
             "description": "<p>Fire district address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "Number",
             "optional": false,
-            "field": "addresses.council_district",
+            "field": "council_district",
             "description": "<p>Council district address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.council_member",
+            "field": "council_member",
             "description": "<p>Council Member representing the given address</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.parcel_atlas_sheet",
+            "field": "parcel_atlas_sheet",
             "description": "<p>Legacy parcel sheet address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.code_enforcement_officer",
+            "field": "code_enforcement_officer",
             "description": "<p>Code enforcement officer assigned to address</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.census_tract",
+            "field": "census_tract",
             "description": "<p>Census tract address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.college_district",
+            "field": "college_district",
             "description": "<p>Community college district address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.elementary_school_district",
+            "field": "elementary_school_district",
             "description": "<p>Elementary school district address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "Boolean",
             "optional": false,
-            "field": "addresses.in_sfha",
+            "field": "in_sfha",
             "description": "<p>Boolean noting if address is within a FEMA special flood hazard area</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.sfha_zone",
+            "field": "sfha_zone",
             "description": "<p>FEMA special flood hazard area address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.high_school_district",
+            "field": "high_school_district",
             "description": "<p>High school district address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.parcel_apn",
+            "field": "parcel_apn",
             "description": "<p>Parcel APN id address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.unified_school_district",
+            "field": "unified_school_district",
             "description": "<p>Unified school district address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.nearest_fire_station",
+            "field": "nearest_fire_station",
             "description": "<p>Closest Garden Grove fire station to address</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.cdbg_zone",
+            "field": "cdbg_zone",
             "description": "<p>Community Development Block Grant address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.land_use_designation",
+            "field": "land_use_designation",
             "description": "<p>General Plan land use designation address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.redevelopment_zone",
+            "field": "redevelopment_zone",
             "description": "<p>Redevelopment zone address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.zoning_zone",
+            "field": "zoning_zone",
             "description": "<p>Planning zone address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.zoning_designation",
+            "field": "zoning_designation",
             "description": "<p>Planning zone designation address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.street_sweeping_days",
+            "field": "street_sweeping_days",
             "description": "<p>Days of month street sweeping occurs at address</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.trash_pickup_day",
+            "field": "trash_pickup_day",
             "description": "<p>Day of week trash pickup occurs at address</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.state_assembly_district",
+            "field": "state_assembly_district",
             "description": "<p>CA State Assembly district address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.state_congressional_district",
+            "field": "state_congressional_district",
             "description": "<p>CA State Congressional district address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.state_senate_district",
+            "field": "state_senate_district",
             "description": "<p>CA State Senate district address spatially intersects</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "addresses.nearest_park",
+            "field": "nearest_park",
             "description": "<p>Nearest city park to address</p>"
           },
           {
             "group": "Success 200",
             "type": "Number",
             "optional": false,
-            "field": "addresses.longitude",
+            "field": "longitude",
             "description": "<p>SRID 4326</p>"
           },
           {
             "group": "Success 200",
             "type": "Number",
             "optional": false,
-            "field": "addresses.latitude",
+            "field": "latitude",
             "description": "<p>SRID 4326</p>"
           }
         ]
@@ -562,6 +562,223 @@ define({ "api": [
     "groupTitle": "Locations"
   },
   {
+    "type": "get",
+    "url": "/parcels/info",
+    "title": "/parcels/info",
+    "description": "<p>Returns information we have that spatially intersects a parcel.</p>",
+    "name": "GetParcelsInfo",
+    "group": "Parcels",
+    "version": "1.0.0",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "q",
+            "description": "<p>Parcel APN.</p> <p>Requires a minimum string length of 8 characters. Returns one and only one result even if there are multiple matches.</p> <p>Eg: <br> 09016442 <br> 090-164-42</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "parcel_apn",
+            "description": "<p>Parcel Number defined by Orange County</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "approximate_address",
+            "description": "<p>Human readable address string (returns just one of potentially many addresses)</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "postal_city",
+            "description": "<p>City name as it appears in USPS database</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "jurisdiction",
+            "description": "<p>Agency in which parcel physically exists</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "zip_code",
+            "description": "<p>Zip code</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "pd_district",
+            "description": "<p>Police district parcel spatially intersects</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "council_district",
+            "description": "<p>Council district parcel spatially intersects</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "council_member",
+            "description": "<p>Council Member representing the given parcel</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "parcel_atlas_sheet",
+            "description": "<p>Legacy parcel sheet parcel spatially intersects</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "code_enforcement_officer",
+            "description": "<p>Code enforcement officer assigned to parcel</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "census_tract",
+            "description": "<p>Census tract parcel spatially intersects</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "college_district",
+            "description": "<p>Community college district parcel spatially intersects</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "elementary_school_district",
+            "description": "<p>Elementary school district parcel spatially intersects</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "in_sfha",
+            "description": "<p>Boolean noting if parcel is within a FEMA special flood hazard area</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "sfha_zone",
+            "description": "<p>FEMA special flood hazard area parcel spatially intersects</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "high_school_district",
+            "description": "<p>High school district parcel spatially intersects</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "unified_school_district",
+            "description": "<p>Unified school district address spatially intersects</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "land_use_designation",
+            "description": "<p>General Plan land use designation parcel centroid spatially intersects</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "zoning_zone",
+            "description": "<p>Planning zone parcel_centroid spatially intersects</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "zoning_designation",
+            "description": "<p>Planning zone designation parcel centroid spatially intersects</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "state_assembly_district",
+            "description": "<p>CA State Assembly district parcel spatially intersects</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "state_congressional_district",
+            "description": "<p>CA State Congressional district parcel spatially intersects</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "state_senate_district",
+            "description": "<p>CA State Senate district parcel spatially intersects</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "longitude",
+            "description": "<p>SRID 4326</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "latitude",
+            "description": "<p>SRID 4326</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "bounding_box",
+            "description": "<p>Extents of parcel geometry. SRID 4326</p>"
+          }
+        ]
+      }
+    },
+    "sampleRequest": [
+      {
+        "url": "https://ggcity.org/maps/api/parcels/info"
+      }
+    ],
+    "filename": "./api.rb",
+    "groupTitle": "Parcels"
+  },
+  {
     "success": {
       "fields": {
         "Success 200": [
@@ -585,8 +802,8 @@ define({ "api": [
     "url": "",
     "version": "0.0.0",
     "filename": "./doc/main.js",
-    "group": "_srv_containers_api_doc_main_js",
-    "groupTitle": "_srv_containers_api_doc_main_js",
+    "group": "_home_josephs_workspace_docker_gis_api_doc_main_js",
+    "groupTitle": "_home_josephs_workspace_docker_gis_api_doc_main_js",
     "name": ""
   }
 ] });

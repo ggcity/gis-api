@@ -1,4 +1,4 @@
-# @author Rachot Moragraan
+#@author Rachot Moragraan
 
 require 'sinatra'
 require 'pg'
@@ -167,7 +167,6 @@ get '/addresses/info' do
   select = <<-SQL
       a.address_id,
       a.address,
-      a.postal_city as city,
       a.postal_city,
       a.jurisdiction,
       a.zip_code,
@@ -225,6 +224,108 @@ get '/addresses/info' do
   end
 
   results = @db.exec_params(sql, [ s ])
+  if results.num_tuples == 0 then
+    return {}.to_json
+  else 
+    return results[0].to_json
+  end
+end
+
+
+=begin
+  @api {get} /parcels/info /parcels/info
+  @apiDescription Returns information we have that spatially intersects a parcel.
+  @apiName GetParcelsInfo
+  @apiGroup Parcels
+  @apiVersion 1.0.0
+
+  @apiParam {String} q 
+    Parcel APN.
+
+    Requires a minimum string length of 8 characters. Returns one and only one result even if 
+    there are multiple matches.
+    
+    Eg: \
+    09016442 \
+    090-164-42 
+
+  @apiSuccess {String}   parcel_apn Parcel Number defined by Orange County
+  @apiSuccess {String}   approximate_address Human readable address string (returns just one of potentially many addresses)
+  @apiSuccess {String}   postal_city City name as it appears in USPS database
+  @apiSuccess {String}   jurisdiction Agency in which parcel physically exists
+  @apiSuccess {String}   zip_code Zip code
+  @apiSuccess {String}   pd_district Police district parcel spatially intersects
+  @apiSuccess {Number}   council_district Council district parcel spatially intersects
+  @apiSuccess {String}   council_member Council Member representing the given parcel
+  @apiSuccess {String}   parcel_atlas_sheet Legacy parcel sheet parcel spatially intersects
+  @apiSuccess {String}   code_enforcement_officer Code enforcement officer assigned to parcel
+  @apiSuccess {String}   census_tract Census tract parcel spatially intersects
+  @apiSuccess {String}   college_district Community college district parcel spatially intersects
+  @apiSuccess {String}   elementary_school_district Elementary school district parcel spatially intersects
+  @apiSuccess {Boolean}  in_sfha Boolean noting if parcel is within a FEMA special flood hazard area
+  @apiSuccess {String}   sfha_zone FEMA special flood hazard area parcel spatially intersects
+  @apiSuccess {String}   high_school_district High school district parcel spatially intersects
+  @apiSuccess {String}   unified_school_district Unified school district address spatially intersects
+  @apiSuccess {String}   land_use_designation General Plan land use designation parcel centroid spatially intersects
+  @apiSuccess {String}   zoning_zone Planning zone parcel_centroid spatially intersects
+  @apiSuccess {String}   zoning_designation Planning zone designation parcel centroid spatially intersects
+  @apiSuccess {String}   state_assembly_district CA State Assembly district parcel spatially intersects
+  @apiSuccess {String}   state_congressional_district CA State Congressional district parcel spatially intersects
+  @apiSuccess {String}   state_senate_district CA State Senate district parcel spatially intersects
+  @apiSuccess {Number}   longitude SRID 4326
+  @apiSuccess {Number}   latitude SRID 4326
+  @apiSuccess {String}   bounding_box Extents of parcel geometry. SRID 4326 
+
+  @apiSampleRequest /parcels/info
+=end
+get '/parcels/info' do
+
+  q = params[:q].gsub('-', '')
+  q = (q && q.strip == '') ? nil : q
+
+  select = <<-SQL
+      p.parcel_apn,
+      p.approximate_address,
+      p.postal_city as city,
+      p.postal_city,
+      p.jurisdiction,
+      p.zip_code,
+      p.pd_district,
+      p.council_district,
+      p.council_member,
+      p.parcel_atlas_sheet,
+      p.code_enforcement_officer,
+      p.census_tract,
+      p.college_district,
+      p.elementary_school_district,
+      p.in_sfha,
+      p.sfha_zone,
+      p.high_school_district,
+      p.unified_school_district,
+      p.land_use_designation,
+      p.zoning_zone,
+      p.zoning_designation,
+      p.state_assembly_district,
+      p.state_congressional_district,
+      p.state_senate_district,
+      p.longitude,
+      p.latitude,
+      p.bounding_box
+  SQL
+
+  if q then
+    sql = <<-SQL
+      SELECT
+      #{select}
+      FROM gis_city.parcels_spatial_joins p
+      WHERE p.parcel_apn = $1 
+      LIMIT 1
+    SQL
+  else
+    return {}.to_json
+  end
+
+  results = @db.exec_params(sql, [ q ])
   if results.num_tuples == 0 then
     return {}.to_json
   else 
