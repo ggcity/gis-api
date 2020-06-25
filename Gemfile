@@ -1,4 +1,5 @@
 source 'https://rubygems.org' do
+  gem 'rack', '>= 2.1.4'
   gem 'pg', '>=1.1.3'
   gem 'sinatra', '>=2.0.4'
 
