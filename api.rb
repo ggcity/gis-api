@@ -365,10 +365,11 @@ end
 
 get '/cities/spatial_search' do
   q = params[:q]
+  lat = params[:lat]
   lng = params[:lng]
 
   sql = <<-SQL
-    with point as (select gis.create_point_geom($2::numeric(11,8), $1::numeric(11,8)) as geom),
+    with point as (select gis.create_point_geom($1::numeric(11,8), $2::numeric(11,8)) as geom),
     within as (select c.name from gis_county.city_boundaries c join point p on st_intersects(c.geom, p.geom)),
     nearest as (select cb.name, st_distance(p.geom, cb.geom) as distance 
         from gis_county.city_boundaries cb, point p
