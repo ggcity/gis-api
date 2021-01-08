@@ -204,8 +204,8 @@ get '/addresses/info' do
     sql = <<-SQL
       SELECT
       #{select}
-      FROM gis.city_addresses ca
-      LEFT JOIN gis_city.addresses_spatial_joins a ON a.address_id = ca.id
+      FROM public.addresses ca
+      LEFT JOIN public.addresses_spatial_joins a ON a.address_id = ca.id
       LEFT JOIN gis_city.addresses_nearest_park np ON np.address_id = ca.id
       WHERE ca.id = $1
     SQL
@@ -214,8 +214,8 @@ get '/addresses/info' do
       SELECT
       #{select}
       FROM gg_find_address($1) gfa
-      JOIN gis.city_addresses ca ON ca.id = gfa.key
-      LEFT JOIN gis_city.addresses_spatial_joins a ON a.address_id = gfa.key
+      JOIN public.addresses ca ON ca.id = gfa.key
+      LEFT JOIN public.addresses_spatial_joins a ON a.address_id = gfa.key
       LEFT JOIN gis_city.addresses_nearest_park np ON np.address_id = gfa.key
       LIMIT 1
     SQL
@@ -274,14 +274,14 @@ end
   @apiSuccess {String}   state_senate_district CA State Senate district parcel spatially intersects
   @apiSuccess {Number}   longitude SRID 4326
   @apiSuccess {Number}   latitude SRID 4326
-  @apiSuccess {String}   bounding_box Extents of parcel geometry. SRID 4326 
+  @apiSuccess {String}   bounding_box Bounding box coordinates of parcel geometry. WKT, SRID 4326.
 
   @apiSampleRequest /parcels/info
 =end
 get '/parcels/info' do
 
   q = params[:q].gsub('-', '')
-  q = (q && q.strip == '') ? nil : q
+  q = (q && q.strip == '') ? nil : q.strip
 
   select = <<-SQL
       p.parcel_apn,

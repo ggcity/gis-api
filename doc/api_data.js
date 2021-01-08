@@ -765,7 +765,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "bounding_box",
-            "description": "<p>Extents of parcel geometry. SRID 4326</p>"
+            "description": "<p>Bounding box coordinates of parcel geometry. WKT, SRID 4326.</p>"
           }
         ]
       }
@@ -802,8 +802,8 @@ define({ "api": [
     "url": "",
     "version": "0.0.0",
     "filename": "./doc/main.js",
-    "group": "_home_josephs_workspace_docker_gis_api_doc_main_js",
-    "groupTitle": "_home_josephs_workspace_docker_gis_api_doc_main_js",
+    "group": "_srv_containers_api_doc_main_js",
+    "groupTitle": "_srv_containers_api_doc_main_js",
     "name": ""
   }
 ] });

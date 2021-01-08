@@ -1,3 +1,4 @@
 .yardoc
 node_modules
 secrets.yml
+*.swp
