@@ -310,7 +310,7 @@ get '/parcels/info' do
       p.state_senate_district,
       p.longitude,
       p.latitude,
-      p.bounding_box
+      ST_AsText(p.bounding_box) as bounding_box
   SQL
 
   if q then
